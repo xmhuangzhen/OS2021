@@ -10,6 +10,9 @@ static void printk_write_string(const char *str) {
     // this function print string by the const char pointer
     // I think 3 lines of codes are enough, do you think so?
     // It's easy for you, right?
+    for(int i = 0;str[i] != 0;i++) {
+        sys_putc(str[i]);
+    }
 }
 
 
@@ -20,6 +23,20 @@ static void printk_write_num(int base, unsigned long long n, int neg) {
     // you do not need to print prefix like "0x", "0"...
     // Remember the most significant digit is printed first.
     // It's easy for you, right?
+
+    if (neg == 1)
+        sys_putc('-');
+
+    unsigned long long y = 1;
+    for (; n > (y * base); y *= base);
+    for (; n > 0; y /= base) {
+        int res = n/y;
+        if(res < 10)
+            sys_putc(res+'0');
+        else
+            sys_putc(res-10+'a');
+        n%=y;
+    }
 }
 
 #endif  // ACMOS_SPR21_ANSWER_PRINTK_H
