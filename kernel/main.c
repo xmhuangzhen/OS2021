@@ -1,0 +1,48 @@
+//
+// Created by Wenxin Zheng on 2021/1/9.
+//
+
+#include <defs.h>
+#include <riscv.h>
+
+#include "lock.h"
+#include "printk.h"
+#include "uart.h"
+#include "mm.h"
+#include "process.h"
+
+volatile static int started = 0;
+
+
+
+void main(){
+    if(cpuid() == 0){ // primary cpu
+        uart_init();
+        printk("UART Finish initialization. 1013 decimal is %x hex, %b binary, %d dec.\n",
+               1013, 1013, 1013);
+        printk("kernel lock address: 0x%lx\n", &big_kernel_lock);
+        printk("UART String: %s\n", "Hello, world!");
+        kernel_lock_init();
+        TEST_lock_test();
+        kern_page_init();
+        kern_page_test();
+        mm_init();
+        pt_init();
+        DEBUG("MAIN-1\n");
+        trap_init_vec();
+        DEBUG("MAIN-0\n");
+        sched_init();
+        DEBUG("main-1\n");
+        proc_init();
+        DEBUG("main-2\n");
+
+        sync_synchronize();
+        started = 1;
+    } else {
+        while(started == 0);
+        sync_synchronize();
+    }
+    DEBUG("main-3\n");
+
+    sched_start();
+}
